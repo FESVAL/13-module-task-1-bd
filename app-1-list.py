@@ -27,7 +27,7 @@ def execute_sql(conn, sql):
         print(e)
 
 
-def add_student(conn, student):
+def add_student(conn, students_list):
     """
     add a new student into the students table
     :param conn:
@@ -37,12 +37,12 @@ def add_student(conn, student):
     sql = '''INSERT or IGNORE INTO students(id, surname, name,  age, class)
             VALUES(?,?,?,?,?)'''
     cur = conn.cursor()
-    cur.execute(sql, student)
+    cur.executemany(sql, students_list)
     conn.commit()
     return cur.lastrowid
 
 
-def add_subject(conn, subject):
+def add_subject(conn, subjects_list):
     """
     add a new subject into the subject table
     :param conn:
@@ -52,13 +52,12 @@ def add_subject(conn, subject):
     sql = '''INSERT or IGNORE INTO subjects(id, student_id, subject, grade)
             VALUES(?,?,?,?)'''
     cur = conn.cursor()
-    cur.execute(sql, subject)
+    cur.executemany(sql, subjects_list)
     conn.commit()
     return cur.lastrowid
 
 
 def select_all(conn, table):
-    sql = '''SELECT FROM students ()'''
 
     cur = conn.cursor()
     cur.execute(f"SELECT *FROM {table}")
@@ -179,17 +178,35 @@ if __name__ == '__main__':
         execute_sql(conn, create_students_sql)
         execute_sql(conn, create_subjects_sql)
 
-    student = ("1", "Артеменко", "Олександр", "10", "5-D")
-    student = ("2", "Микитенко", "Дмитро", "10", "5-A")
-    student = ("3", "Сергієнко", "Віктор", "10", "5-С")
-    student_id = add_student(conn, student)
+    students_list = [
+        ("1", "Артеменко", "Олександр", "10", "5-D"),
+        ("2", "Микитенко", "Дмитро", "10", "5-A"),
+        ("3", "Сергієнко", "Віктор", "10", "5-С")
+    ]
 
-    subject = ("1", student_id, "Математика", "6")
-    subject = ("2", student_id, "Математика", "5")
-    subject = ("3", student_id, "Математика", "4")
-    subject_id = add_subject(conn, subject)
+    student_id = add_student(conn, students_list)
 
-    print(student_id, subject_id)
+    # for student in students_list:
+    # student_id = add_student(conn, students_list)
+    # print(student_id)
+
+    # student = ("1", "Артеменко", "Олександр", "10", "5-D")
+    # student = ("2", "Микитенко", "Дмитро", "10", "5-A")
+    # student = ("3", "Сергієнко", "Віктор", "10", "5-С")
+
+    subjects_list = [
+        ("1", "1", "Математика", "6"),
+        ("2", "2", "Математика", "5"),
+        ("3", "3", "Математика", "4")
+    ]
+
+    subject_id = add_subject(conn, subjects_list)
+
+    # for subject in subjects_list:
+    # subject_id = add_subject(conn, subjects_list)
+    # print(subject_id)
+
+    # print(student_id, subject_id)
     conn.commit
 
     select_all(conn, "students")
@@ -197,9 +214,22 @@ if __name__ == '__main__':
     select_where(conn, "students", surname="Микитенко")
     select_where(conn, "subjects", subject="Математика")
 
-    update(conn, "students", 3, age=11)
+    # update(conn, "students", 3, age=11)
 
     # delete_where(conn, "students", id=2)
     # delete_all(conn, "subjects")
 
     conn.close()
+
+    # Додавання у змінну всього списку студентів у VALUES
+
+    # add_student_sql = """
+    # --insert into table students
+    # INSERT or IGNORE INTO students(id, surname, name,  age, class)
+    # VALUES(
+    # "1", "Артеменко", "Олександр", "10", "5-D",
+    # "2", "Микитенко", "Дмитро", "10", "5-A",
+    # "3", "Сергієнко", "Віктор", "10", "5-С"
+    # """
+
+    # execute_sql(conn, add_student_sql)
